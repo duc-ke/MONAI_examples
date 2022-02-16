@@ -3,6 +3,7 @@ data/
 dataset/
 *.pth
 core
+runs_*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
