@@ -4,6 +4,7 @@ dataset/
 *.pth
 core
 runs_*/
+standardisation_models.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
