@@ -1,0 +1,19 @@
+data_dir: /data/train/running/l/input_augmented
+image_file_path: "{dir}/s_{id}_{aid}_b.nii.gz"
+label_file_path: "{dir}/s_{id}_{aid}_l.nii.gz"
+mask_file_path: "{dir}/s_{id}_{aid}_m.nii.gz"
+log_dir: /data/train/running/l/model_roi_toy_220210/logs
+model_dir: /data/train/running/l/model_roi_toy_220210/models
+random_seed: 0
+num_classes: 109
+patch_size: [96, 96, 96]
+train:
+  max_epoches: 1500
+  batch_size: 3
+  num_samples: 4
+  num_workers: 4
+  lr: 1.0e-3
+  val_interval: 2
+val:
+  batch_size: 1
+  num_workers: 4
