@@ -5,6 +5,10 @@ dataset/
 core
 runs_*/
 standardisation_models.txt
+download/
+models/
+out/
+runs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
