@@ -10,6 +10,7 @@ models/
 out/
 runs/
 *.zip
+*.nii.gz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
