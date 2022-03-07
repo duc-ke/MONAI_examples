@@ -293,6 +293,26 @@ def get_validation_transform():
     return Compose(transforms)
 
 
+def get_test_transform():
+    keys = ["image", "mask"]
+    transforms = [
+        LoadImaged(keys=keys),
+        AddChanneld(keys=keys),
+        Orientationd(keys=keys, axcodes="RAS"),
+        ConcatItemsd(keys=["image", "mask"], name="image"),
+        PreprocessAnisotropic(
+            keys=["image"],
+            clip_values=clip_values,
+            pixdim=spacing,
+            normalize_values=normalize_values,
+            model_mode="test",
+        ),
+        CastToTyped(keys=["image"], dtype=(np.float32)),
+        EnsureTyped(keys=["image"]),
+    ]
+    return Compose(transforms)
+
+
 def _get_train_transform(patch_size, num_samples):
     keys = ["image", "label"]
     transforms = [
@@ -396,23 +416,7 @@ def _get_validation_transform():
     return Compose(transforms)
 
 
-def get_test_transform():
-    keys = ["image"]
-    transforms = [
-        LoadImaged(keys=keys),
-        AddChanneld(keys=keys),
-        Orientationd(keys=keys, axcodes="RAS"),
-        PreprocessAnisotropic(
-            keys=keys,
-            clip_values=clip_values,
-            pixdim=spacing,
-            normalize_values=normalize_values,
-            model_mode="test",
-        ),
-        CastToTyped(keys=keys, dtype=(np.float32)),
-        EnsureTyped(keys=keys),
-    ]
-    return Compose(transforms)
+
 
 def resample_image(image, shape, anisotrophy_flag):
     resized_channels = []
