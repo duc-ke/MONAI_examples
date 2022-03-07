@@ -94,7 +94,8 @@ def get_network_ke(properties, patch_size, spacing, deep_supr_num, pretrain_path
     )
 
     if checkpoint is not None:
-        pretrain_path = os.path.join(pretrain_path, checkpoint)
+        # pretrain_path = os.path.join(pretrain_path, checkpoint)
+        pretrain_path = checkpoint
         if os.path.exists(pretrain_path):
             net.load_state_dict(torch.load(pretrain_path))
             print("pretrained checkpoint: {} loaded".format(pretrain_path))
