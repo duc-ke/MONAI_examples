@@ -57,7 +57,7 @@ class DynUNetInferrer(SupervisedEvaluator):
         device: torch.device,
         val_data_loader: DataLoader,
         network: torch.nn.Module,
-        output_dir: str,
+        output_dir: str,                                      # infer specific
         num_classes: Union[str, int],
         epoch_length: Optional[int] = None,
         non_blocking: bool = False,
@@ -85,12 +85,12 @@ class DynUNetInferrer(SupervisedEvaluator):
             additional_metrics=additional_metrics,
             val_handlers=val_handlers,
             amp=amp,
-        )
+        )  
 
         if not isinstance(num_classes, int):
             num_classes = int(num_classes)
         self.post_pred = AsDiscrete(argmax=True, to_onehot=num_classes)
-        self.output_dir = output_dir
+        self.output_dir = output_dir               # infer specific
         self.tta_val = tta_val
         self.num_classes = num_classes
 
@@ -150,7 +150,7 @@ class DynUNetInferrer(SupervisedEvaluator):
         inputs = inputs.cpu()
         predictions = self.post_pred(decollate_batch(predictions)[0])
 
-        affine = batchdata["image_meta_dict"]["affine"].numpy()[0]
+        affine = batchdata["image_meta_dict"]["affine"].numpy()[0]            # infer specific
         resample_flag = batchdata["resample_flag"]
         anisotrophy_flag = batchdata["anisotrophy_flag"]
         crop_shape = batchdata["crop_shape"][0].tolist()
