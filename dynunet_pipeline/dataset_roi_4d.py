@@ -44,7 +44,7 @@ train_aids = [
 
 val_aids = [
     "00_0",
-    "01_d",
+    # "01_d",
 ]
 
 def get_train_data(id_file, data_dir, 
@@ -80,6 +80,25 @@ def get_val_data(id_file, data_dir,
                 {
                     "image": image_file_pattern.format(dir=data_dir, id=id, aid=aid),
                     "label": label_file_pattern.format(dir=data_dir, id=id, aid=aid),
+                    # "brain": brain_file_pattern.format(dir=data_dir, id=id, aid=aid),
+                    "mask": mask_file_pattern.format(dir=data_dir, id=id, aid=aid),
+                }
+            )
+            print(image_file_pattern, data_dir, id, aid)
+    return data
+
+def get_test_data(id_file, data_dir, 
+                 image_file_pattern, mask_file_pattern):
+    f = open(id_file)
+    rows = csv.DictReader(f)
+    data = []
+    for row in rows:
+        id = row["id"]
+        for aid in val_aids:
+            data.append(
+                {
+                    "image": image_file_pattern.format(dir=data_dir, id=id, aid=aid),
+                    # "label": label_file_pattern.format(dir=data_dir, id=id, aid=aid),
                     # "brain": brain_file_pattern.format(dir=data_dir, id=id, aid=aid),
                     "mask": mask_file_pattern.format(dir=data_dir, id=id, aid=aid),
                 }
@@ -174,15 +193,21 @@ def get_test_loader(
     data_dir,
     id_file,
     image_file_pattern,
-    label_file_pattern,
+    mask_file_pattern,
     batch_size,
     num_workers=1,
+    multi_gpu_flag = False
 ):
-    data = get_val_data(id_file, data_dir, image_file_pattern, label_file_pattern)
+    data = get_test_data(
+        id_file, data_dir, 
+        image_file_pattern,
+        mask_file_pattern
+    )
 
     transform = get_test_transform()
 
-    if torch.cuda.is_available() and dist.get_world_size() > 1:
+    # if torch.cuda.is_available() and dist.get_world_size() > 1:
+    if multi_gpu_flag:
         data = partition_dataset(
             data=data,
             shuffle=False,
