@@ -16,7 +16,7 @@ from monai.networks.utils import eval_mode
 from monai.transforms import AsDiscrete, Transform
 from torch.utils.data import DataLoader
 
-from transforms import recovery_prediction
+from transforms_roi import recovery_prediction
 
 from monai.transforms import Compose, AddChannel, MapLabelValue
 
@@ -182,8 +182,8 @@ class DynUNetEvaluator(SupervisedEvaluator):
 
         
         
-        filename = batchdata["image_meta_dict"]["filename_or_obj"][0].split("/")[-1]
-        print(f'MRI img:{ filename } eval done .................')
+        # filename = batchdata["image_meta_dict"]["filename_or_obj"][0].split("/")[-1]
+        # print(f'MRI img:{ filename } eval done .................')
         
         engine.fire_event(IterationEvents.FORWARD_COMPLETED)
         engine.fire_event(IterationEvents.MODEL_COMPLETED)
@@ -612,6 +612,8 @@ class DynUNetEvaluator_GPU_SaveResult_PostMapping(SupervisedEvaluator):
         val_handlers: Optional[Sequence] = None,
         amp: bool = False,
         tta_val: bool = False,
+        orig_label_classes : Sequence = None,
+        target_label_classes : Sequence = None,
     ) -> None:
         super().__init__(
             device=device,
@@ -637,27 +639,27 @@ class DynUNetEvaluator_GPU_SaveResult_PostMapping(SupervisedEvaluator):
         self.post_label = AsDiscrete(to_onehot=num_classes)              # eval specific
         self.tta_val = tta_val
         
-        orig_label_classes, target_label_classes = (
-            np.array([   0,    2,    3,    4,    5,    7,    8,   10,   11,   12,   13,
-                14,   15,   16,   17,   18,   24,   26,   28,   30,   31,   41,
-                42,   43,   44,   46,   47,   49,   50,   51,   52,   53,   54,
-                58,   60,   62,   63,   77,   80,   85,  251,  252,  253,  254,
-                255, 1000, 1002, 1003, 1005, 1006, 1007, 1008, 1009, 1010, 1011,
-            1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022,
-            1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1034, 1035,
-            2000, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012,
-            2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023,
-            2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2034, 2035], dtype=np.float64),
-            np.array([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
-                13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,
-                26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,
-                39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,
-                52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,
-                65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,
-                78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,
-                91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 102, 103,
-            104, 105, 106, 107, 108], dtype=np.float64)
-        )
+        # orig_label_classes, target_label_classes = (
+        #     np.array([   0,    2,    3,    4,    5,    7,    8,   10,   11,   12,   13,
+        #         14,   15,   16,   17,   18,   24,   26,   28,   30,   31,   41,
+        #         42,   43,   44,   46,   47,   49,   50,   51,   52,   53,   54,
+        #         58,   60,   62,   63,   77,   80,   85,  251,  252,  253,  254,
+        #         255, 1000, 1002, 1003, 1005, 1006, 1007, 1008, 1009, 1010, 1011,
+        #     1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022,
+        #     1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1034, 1035,
+        #     2000, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012,
+        #     2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023,
+        #     2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2034, 2035], dtype=np.float64),
+        #     np.array([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
+        #         13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,
+        #         26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,
+        #         39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,
+        #         52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,
+        #         65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,
+        #         78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,
+        #         91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 102, 103,
+        #     104, 105, 106, 107, 108], dtype=np.float64)
+        # )
         self.orig_label_classes = orig_label_classes
         self.target_label_classes = target_label_classes
         # self.post_trans = Compose([
@@ -804,13 +806,13 @@ class DynUNetEvaluator_GPU_SaveResult_PostMapping(SupervisedEvaluator):
         
         predictions_wirte_org[h_start:h_end, w_start:w_end, d_start:d_end] = predictions_wirte
         del predictions_wirte
-        print('변형전 dtype', predictions_wirte_org.dtype)
-        print(np.unique(predictions_wirte_org))
+        # print('변형전 dtype', predictions_wirte_org.dtype)
+        # print(np.unique(predictions_wirte_org))
         predictions_wirte_org = self.post_trans(predictions_wirte_org)   # 원래대로 pred index 복구
         # predictions_wirte_org = predictions_wirte_org.squeeze()
         # predictions_wirte_org = post_trans(predictions_wirte_org)
-        print('변형후 dtype', predictions_wirte_org.dtype)
-        print(np.unique(predictions_wirte_org))
+        # print('변형후 dtype', predictions_wirte_org.dtype)
+        # print(np.unique(predictions_wirte_org))
         
         filename = batchdata["image_meta_dict"]["filename_or_obj"][0].split("/")[-1]
         print(
