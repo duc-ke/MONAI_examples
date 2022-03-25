@@ -44,7 +44,7 @@ train_aids = [
 
 val_aids = [
     "00_0",
-    # "01_d",
+    "01_d",
 ]
 
 def get_train_data(id_file, data_dir, 
