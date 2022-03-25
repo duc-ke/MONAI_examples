@@ -1,0 +1,8 @@
+data_dir: /data/train/running/l/input_augmented
+pred_file_path: "{dir}/s_{id}_{aid}_l.nii.gz"
+label_file_path: "{dir}/s_{id}_{aid}_l.nii.gz"
+random_seed: 0
+num_classes: 109
+eval:
+  batch_size: 1
+  num_workers: 4
